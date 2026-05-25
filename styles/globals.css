@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #0d0d1a;
+  --bg2:   #13132b;
+  --bg3:   #1a1a38;
+  --bg4:   #1f1f40;
+  --b1:    #252545;
+  --b2:    #2e2e55;
+  --text:  #e8e8f8;
+  --t2:    #9090bb;
+  --t3:    #555588;
+  --purple:#AFA9EC;
+  --teal:  #5DCAA5;
+  --coral: #F0997B;
+  --pink:  #ED93B1;
+  --blue:  #85B7EB;
+  --amber: #EF9F27;
+  --red:   #D85A30;
+  --green: #97C459;
+  --gray:  #B4B2A9;
+  --acc:   #534AB7;
+  --acc2:  #6B5FA8;
+  --danger:#FF4444;
+  --warn:  #EF9F27;
+  --ok:    #5DCAA5;
+  --font:  'DM Sans', system-ui, sans-serif;
+  --mono:  'Space Mono', 'Courier New', monospace;
+}
+
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Subtle noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+* { position: relative; z-index: 1; }
+
+.mono { font-family: var(--mono); }
+.container { max-width: 1080px; margin: 0 auto; padding: 1.5rem 1.25rem; }
+
+/* Header */
+.header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--b1);
+}
+.header-icon { font-size: 24px; }
+.header h1 { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--purple); letter-spacing: .06em; }
+.header p { font-size: 11px; color: var(--t3); font-family: var(--mono); margin-top: 2px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.tab {
+  background: transparent;
+  border: 1px solid var(--b2);
+  border-radius: 6px; padding: 6px 13px;
+  color: var(--t2); font-size: 11px;
+  font-family: var(--mono); cursor: pointer;
+  letter-spacing: .06em; transition: all .15s;
+}
+.tab:hover { border-color: var(--t3); color: var(--text); }
+.tab.on { background: #1e1535; color: var(--purple); border-color: var(--acc); }
+
+/* Cards */
+.pcard {
+  background: var(--bg2);
+  border: 1px solid var(--b1);
+  border-radius: 10px; padding: 10px 12px;
+  cursor: pointer; margin-bottom: 8px;
+  transition: border-color .15s, background .15s;
+}
+.pcard:hover { background: var(--bg3); border-color: var(--b2); }
+.scard {
+  background: var(--bg2);
+  border: 1px solid var(--b1);
+  border-radius: 10px; padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+/* Badges */
+.rb { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-family: var(--mono); letter-spacing: .04em; display: inline-block; }
+
+/* Form */
+.pi {
+  background: var(--bg3);
+  border: 1px solid var(--b2);
+  border-radius: 8px; padding: 7px 10px;
+  color: var(--text); font-size: 12px;
+  font-family: var(--mono); width: 100%;
+  transition: border-color .15s;
+}
+.pi:focus { outline: 2px solid var(--acc); border-color: transparent; }
+.pi::placeholder { color: var(--t3); }
+
+.abtn {
+  background: var(--acc);
+  border: none; border-radius: 8px; padding: 11px;
+  color: #EEEDFE; font-size: 12px;
+  font-family: var(--mono); cursor: pointer;
+  width: 100%; letter-spacing: .08em;
+  transition: background .15s, transform .1s;
+}
+.abtn:hover { background: var(--acc2); transform: translateY(-1px); }
+.abtn:active { transform: translateY(0); }
+
+.ta {
+  width: 100%; background: var(--bg3);
+  border: 1px solid var(--b2); border-radius: 8px;
+  padding: 8px 10px; color: var(--t2);
+  font-size: 11px; font-family: var(--mono);
+  resize: vertical; min-height: 65px;
+}
+.ta:focus { outline: 2px solid var(--acc); border-color: transparent; }
+.ta::placeholder { color: var(--t3); }
+
+/* Grid */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start; }
+.grid2i { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: .75rem; }
+
+/* Stat bars */
+.sb { flex: 1; height: 4px; background: var(--b1); border-radius: 2px; }
+.sbf { height: 4px; border-radius: 2px; transition: width .4s ease; }
+
+/* Warning boxes */
+.wbox {
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 7px;
+  font-family: var(--mono); font-size: 11px;
+  display: none;
+  animation: fadeIn .2s ease;
+}
+.wbox.visible { display: block; }
+.wbox.ghost { border: 1px solid #FF444466; background: #1a0808; color: #FF6666; }
+.wbox.defiant { border: 1px solid #EF9F2766; background: #1a1408; color: var(--amber); }
+.wbox.armor { border: 1px solid #5DCAA566; background: #081a12; color: var(--teal); }
+
+/* Speeds */
+.speedbox { margin-top: .75rem; padding: 10px 12px; background: var(--bg3); border-radius: 10px; border: 1px solid var(--b1); }
+
+/* Result cards */
+.rsec { background: var(--bg3); border: 1px solid var(--b1); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; animation: fadeIn .3s ease; }
+
+/* Bench */
+.bench { padding: 2.5rem; text-align: center; color: var(--t3); }
+
+.errp { color: var(--danger); font-size: 11px; font-family: var(--mono); margin-bottom: 8px; }
+
+/* Bring 4 chips */
+.pick-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg4); border: 1px solid var(--b2);
+  border-radius: 6px; padding: 4px 9px;
+  font-size: 11px; margin-bottom: 5px; margin-right: 5px;
+}
+
+/* Threat type badges */
+.tier-S { color: #FF4444; }
+.tier-A { color: var(--amber); }
+.tier-LOVE { color: var(--teal); }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Divider */
+.tier-divider {
+  padding: 3px 10px;
+  border-left: 2px solid;
+  border-radius: 0;
+  margin-bottom: 5px;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+}
+
+input[list]::-webkit-calendar-picker-indicator { opacity: 0; width: 100%; }
+
+@media (max-width: 680px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .grid2i { grid-template-columns: 1fr; }
+}
