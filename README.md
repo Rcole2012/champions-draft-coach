@@ -1,34 +1,33 @@
-# Champions Draft Coach — Gemini Edition
+# Champions Draft Coach v6
 
-Perish Song trap team analyzer for Pokemon Champions Regulation M-A doubles.
-**Powered by Google Gemini (completely free — no credit card needed).**
+Perish Song trap team analyzer for Pokemon Champions Regulation M-A.
+Powered by Google Gemini (free tier — no credit card needed).
 
-## Step 1 — Get your free Gemini API key
+## Deploy to Vercel
 
-1. Go to https://aistudio.google.com
-2. Sign in with your Google account
-3. Click **Get API Key** → **Create API Key**
-4. Copy the key
-
-Free tier limits: 15 requests/minute, 1 million tokens/day. More than enough.
-
-## Step 2 — Deploy to Vercel
-
-1. Go to https://vercel.com → sign up with GitHub
-2. Click **Add New Project** → upload this zip
-3. Before clicking Deploy, go to **Environment Variables** and add:
-   - Name: `GEMINI_API_KEY`
-   - Value: your key from Step 1
-4. Click **Deploy**
-
-Done. Free URL, free AI, no ongoing costs.
+1. Push this folder to a GitHub repo
+2. Import to Vercel
+3. Add environment variable: GEMINI_API_KEY = your key from aistudio.google.com
+4. Deploy
 
 ## Run Locally
 
 ```bash
 npm install
-echo "GEMINI_API_KEY=your-key-here" > .env.local
+echo "GEMINI_API_KEY=your-key" > .env.local
 npm run dev
 ```
 
-Open http://localhost:3000
+## Features
+
+- Draft Coach: AI matchup analysis via Gemini
+- Set Predictor: Move/item/ability % for each opponent Pokemon
+- Danger Score: Instant threat rating 1-10
+- Archetype Detector: Auto-labels opponent team type
+- Known Core Alerts: Flags dangerous 2-mon combos with counterplay
+- Lead Predictor: Shows opponent's most likely lead pair
+- Roster Editor: Edit your team in-app, saved to localStorage
+- Match Log: Log W/L with stats by archetype and lead pair
+- Speed Tiers: Reference chart with Scarf calcs
+- Meta Threats: Tiered threat list with counters
+- Win Cons: Strategy guides per archetype
