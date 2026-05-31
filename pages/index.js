@@ -679,7 +679,7 @@ function ArchetypesSection({teams,setTeams,allMatches,saveMatches}){
               </div>
             );
           })}
-          {selArch.id==='perish'&&<button className="abtn" onClick={()=>{const newTeam={id:Date.now(),name:`PS Team ${archTeams.length+1}`,archetype:'perish',roster:TEAM_DEFAULT};setTeams(prev=>[...prev,newTeam]);}} style={{marginTop:12}}>+ Add Perish Trap Team</button>}
+          <AddTeamForm archId={selArch.id} archName={selArch.name} count={archTeams.length} onAdd={newTeam=>setTeams(prev=>[...prev,newTeam])}/>
         </div>
       )}
 
@@ -731,6 +731,114 @@ function ArchetypesSection({teams,setTeams,allMatches,saveMatches}){
   );
 }
 
+// ── Add Team Form ─────────────────────────────────────────────────────────────
+const BLANK_POKEMON = {name:'',role:'',ab:'',item:'',mv:['','','',''],types:[],spe:'',stats:{HP:100,Atk:100,Def:100,SpA:100,SpD:100,Spe:80},note:''};
+
+function AddTeamForm({archId, archName, count, onAdd}){
+  const [open,setOpen]=useState(false);
+  const [teamName,setTeamName]=useState('');
+  const [roster,setRoster]=useState([]);
+  const [addingPoke,setAddingPoke]=useState(false);
+  const [draft,setDraft]=useState({...BLANK_POKEMON});
+
+  const addPoke=()=>{
+    if(!draft.name)return;
+    setRoster(prev=>[...prev,{...draft,id:Date.now(),bg:'#1a1a30',clr:'#AFA9EC',mv:draft.mv.filter(Boolean)}]);
+    setDraft({...BLANK_POKEMON});
+    setAddingPoke(false);
+  };
+
+  const save=()=>{
+    if(!teamName||roster.length===0)return;
+    const newTeam={id:Date.now(),name:teamName,archetype:archId,roster};
+    onAdd(newTeam);
+    setOpen(false);setTeamName('');setRoster([]);
+  };
+
+  if(!open) return(
+    <button className="abtn" onClick={()=>setOpen(true)} style={{marginTop:12}}>
+      + Add {archName} Team
+    </button>
+  );
+
+  return(
+    <div className="card" style={{borderColor:'var(--acc)',marginTop:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <span style={{fontSize:16,fontWeight:700,color:'var(--purple)',fontFamily:'var(--mono)'}}>NEW {archName.toUpperCase()} TEAM</span>
+        <button className="btn-sm" onClick={()=>setOpen(false)}>Cancel</button>
+      </div>
+      <label className="sec-label">Team Name</label>
+      <input className="pi" style={{marginBottom:16}} placeholder={`${archName} Team ${count+1}`} value={teamName} onChange={e=>setTeamName(e.target.value)}/>
+
+      {roster.length>0&&(
+        <div style={{marginBottom:16}}>
+          <span className="sec-label">Roster ({roster.length} Pokemon)</span>
+          {roster.map((p,i)=>(
+            <div key={p.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:'var(--bg3)',borderRadius:8,marginBottom:6}}>
+              <img src={getPokemonImage(p.name)} className="poke-img-xs" alt={p.name} onError={e=>{e.target.style.display='none';}}/>
+              <span style={{fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
+              <span className="mono" style={{fontSize:11,color:'var(--t3)'}}>{p.item} · {p.mv.join('/')}</span>
+              <button onClick={()=>setRoster(r=>r.filter((_,j)=>j!==i))} style={{background:'none',border:'none',color:'var(--t3)',cursor:'pointer',fontSize:16}}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {addingPoke?(
+        <div style={{background:'var(--bg3)',borderRadius:10,padding:16,marginBottom:16,border:'1px solid var(--b2)'}}>
+          <span className="sec-label">Add Pokemon</span>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
+            <div>
+              <label className="sec-label">Name</label>
+              <input className="pi" list="dex" value={draft.name} placeholder="Pokemon name" onChange={e=>setDraft(d=>({...d,name:e.target.value}))}/>
+            </div>
+            <div>
+              <label className="sec-label">Role</label>
+              <input className="pi" value={draft.role} placeholder="e.g. Lead, Sweeper" onChange={e=>setDraft(d=>({...d,role:e.target.value}))}/>
+            </div>
+            <div>
+              <label className="sec-label">Ability</label>
+              <input className="pi" value={draft.ab} placeholder="Ability" onChange={e=>setDraft(d=>({...d,ab:e.target.value}))}/>
+            </div>
+            <div>
+              <label className="sec-label">Item</label>
+              <input className="pi" value={draft.item} placeholder="Held item" onChange={e=>setDraft(d=>({...d,item:e.target.value}))}/>
+            </div>
+          </div>
+          <label className="sec-label">Moves (one per box)</label>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+            {[0,1,2,3].map(i=>(
+              <input key={i} className="pi" value={draft.mv[i]||''} placeholder={`Move ${i+1}`} onChange={e=>{const mv=[...draft.mv];mv[i]=e.target.value;setDraft(d=>({...d,mv}));}}/>
+            ))}
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+            <div>
+              <label className="sec-label">Types (comma separated)</label>
+              <input className="pi" value={(draft.types||[]).join(', ')} placeholder="e.g. Fire, Flying" onChange={e=>setDraft(d=>({...d,types:e.target.value.split(',').map(s=>s.trim()).filter(Boolean)}))}/>
+            </div>
+            <div>
+              <label className="sec-label">Speed stat (shown in game)</label>
+              <input className="pi" value={draft.spe} placeholder="e.g. 155" type="number" onChange={e=>setDraft(d=>({...d,spe:e.target.value,stats:{...d.stats,Spe:+e.target.value||80}}))}/>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button className="abtn" onClick={addPoke} style={{flex:1}}>Add to Roster</button>
+            <button className="btn-sm" onClick={()=>setAddingPoke(false)}>Cancel</button>
+          </div>
+        </div>
+      ):(
+        <button className="btn-sm" onClick={()=>setAddingPoke(true)} style={{marginBottom:16,width:'100%',padding:10,fontSize:13}}>
+          + Add Pokemon to Roster
+        </button>
+      )}
+
+      <button className="abtn" onClick={save} disabled={!teamName||roster.length===0}>
+        Save Team →
+      </button>
+    </div>
+  );
+}
+
 // ── Draft Coach ───────────────────────────────────────────────────────────────
 const KNOWN_CORES=[
   {p:['sneasler','garchomp'],note:'Sneasler FO + Garchomp EQ spread. Sableye+Gengar: Sneasler cannot touch Ghosts.'},
@@ -742,11 +850,17 @@ const KNOWN_CORES=[
   {p:['sinistcha','kingambit'],note:'Rage Powder diverts Body Press. Shadow Ball Sinistcha first.'},
 ];
 
-function DraftCoachTab({team}){
+function DraftCoachTab({teams}){
   const [opponents,setOpponents]=useState(['','','','','','']);
   const [result,setResult]=useState(null);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState(null);
+  const [selTeamId,setSelTeamId]=useState(null);
+  const [format,setFormat]=useState('doubles');
+
+  const allTeams=(teams||[]).filter(t=>t.roster?.length>0);
+  const activeTeam=allTeams.find(t=>t.id===selTeamId)||allTeams[0];
+  const activeRoster=activeTeam?.roster||[];
 
   const update=(i,v)=>setOpponents(p=>{const n=[...p];n[i]=v;return n;});
   const filled=opponents.filter(Boolean);
@@ -755,17 +869,25 @@ function DraftCoachTab({team}){
   const armor=findMons(ARMOR_LIST,filled);
   const arch=filled.length>=2?detectArchetype(filled):null;
   const danger=filled.length>=2?dangerScore(filled):0;
-  const leads=filled.length>=2?predictLeads(filled):[];
+  const leads=filled.length>=2&&format==='doubles'?predictLeads(filled):[];
   const oppLower=filled.map(p=>norm(p));
-  const cores=KNOWN_CORES.filter(c=>c.p.every(k=>oppLower.some(o=>o.includes(k))));
+  const cores=format==='doubles'?KNOWN_CORES.filter(c=>c.p.every(k=>oppLower.some(o=>o.includes(k)))):[];
   const dangerClr=danger<=3?'var(--teal)':danger<=6?'var(--amber)':'var(--coral)';
+
+  const isDoubles=format==='doubles';
+  const isPS=activeRoster.some(p=>p.name?.toLowerCase().includes('gengar'))&&isDoubles;
+  const myNames=activeRoster.map(p=>p.name);
 
   const analyze=async()=>{
     if(filled.length<2){setError('Enter at least 2 opponent Pokemon.');return;}
+    if(!activeRoster.length){setError('No team selected. Add a team in the Archetypes section first.');return;}
     setError(null);setBusy(true);setResult(null);
     try{
-      const tc=`My current team: ${team.map(p=>`${p.name}(${p.ab},${p.item},${p.mv.join('/')})`).join('; ')}. `;
-      const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({opponents,teamContext:tc})});
+      const r=await fetch('/api/analyze',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({opponents,team:activeRoster,format})
+      });
       const d=await r.json();
       if(d.error){setError(d.error);setBusy(false);return;}
       setResult(parseResult(d.result));
@@ -773,9 +895,54 @@ function DraftCoachTab({team}){
     setBusy(false);
   };
 
+  const secKeys=isDoubles
+    ?['BRING 4','LEAD','TURN 1','GAME PLAN','THREATS','BACKUP LINE','ARCHETYPE']
+    :['LEAD WITH','GAME PLAN','KEY MATCHUPS','THREATS','SWITCH PLAN'];
+  const secIcons={...SEC_ICONS,'LEAD WITH':'▶','KEY MATCHUPS':'⚔','SWITCH PLAN':'↩'};
+  const secClrs={...SEC_CLRS,'LEAD WITH':'#AFA9EC','KEY MATCHUPS':'#F0997B','SWITCH PLAN':'#ED93B1'};
+
   return(
     <div className="grid2">
       <div>
+        {/* Team + Format selector */}
+        <div className="card-inner" style={{marginBottom:16}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr auto',gap:12,alignItems:'end'}}>
+            <div>
+              <span className="sec-label">Active Team</span>
+              {allTeams.length===0?(
+                <div style={{padding:'10px 13px',background:'var(--bg3)',borderRadius:8,border:'1px solid var(--b2)'}}>
+                  <span className="mono" style={{fontSize:12,color:'var(--warn)'}}>No teams saved yet — add one in Archetypes</span>
+                </div>
+              ):(
+                <select className="pi" value={selTeamId||''} onChange={e=>setSelTeamId(+e.target.value||allTeams[0]?.id)}>
+                  {allTeams.map(t=>(
+                    <option key={t.id} value={t.id}>{t.name} ({t.archetype})</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div>
+              <span className="sec-label">Format</span>
+              <div style={{display:'flex',gap:6}}>
+                <button className="btn-sm" onClick={()=>setFormat('doubles')} style={isDoubles?{background:'var(--acc)',color:'#fff',borderColor:'var(--acc)'}:{}}>Doubles</button>
+                <button className="btn-sm" onClick={()=>setFormat('singles')} style={!isDoubles?{background:'var(--acc)',color:'#fff',borderColor:'var(--acc)'}:{}}>Singles</button>
+              </div>
+            </div>
+          </div>
+
+          {activeRoster.length>0&&(
+            <div style={{marginTop:12,display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+              {activeRoster.map(p=>(
+                <div key={p.name} style={{display:'flex',alignItems:'center',gap:5,padding:'4px 8px',background:'var(--bg4)',borderRadius:6,border:'1px solid var(--b2)'}}>
+                  <img src={getPokemonImage(p.name)} className="poke-img-xs" alt={p.name} onError={e=>{e.target.style.display='none';}}/>
+                  <span className="mono" style={{fontSize:11,color:'var(--t2)'}}>{p.name}</span>
+                </div>
+              ))}
+              {isPS&&<span className="rb" style={{background:'rgba(175,169,236,0.2)',color:'var(--purple)',border:'1px solid var(--purple)44',fontSize:11}}>Perish Trap</span>}
+            </div>
+          )}
+        </div>
+
         <span className="sec-label">Opponent Team Preview</span>
         <div className="grid2i">
           {opponents.map((val,i)=>(
@@ -789,12 +956,12 @@ function DraftCoachTab({team}){
         {filled.length>=2&&(
           <div className="card-inner" style={{marginBottom:12}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-              <span className="mono" style={{fontSize:13,color:'var(--t3)'}}>Danger Score</span>
+              <span className="mono" style={{fontSize:13,color:'var(--t3)',fontWeight:700,textTransform:'uppercase'}}>Danger Score</span>
               <span className="mono" style={{fontSize:14,color:dangerClr,fontWeight:700}}>{danger}/10 · {danger<=3?'Manageable':danger<=6?'Threatening':'Severe'}</span>
             </div>
             <div className="danger-bar"><div className="danger-fill" style={{width:`${danger*10}%`,background:dangerClr}}/></div>
             {arch&&<div style={{display:'flex',alignItems:'center',gap:8,marginTop:10}}>
-              <span className="mono" style={{fontSize:12,color:'var(--t3)',textTransform:'uppercase'}}>Archetype</span>
+              <span className="mono" style={{fontSize:12,color:'var(--t3)',textTransform:'uppercase',fontWeight:700}}>Archetype</span>
               <span className="mono" style={{fontSize:14,color:'var(--text)',fontWeight:700}}>{arch}</span>
             </div>}
           </div>
@@ -807,16 +974,16 @@ function DraftCoachTab({team}){
           <div key={c.p.join('+')} className="wbox core visible">🎯 Known Core: {c.p.map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(' + ')}<br/><span style={{opacity:.8}}>{c.note}</span></div>
         ))}
 
-        {leads.length>0&&(
+        {isDoubles&&leads.length>0&&(
           <div className="card-inner" style={{marginBottom:12}}>
             <span className="sec-label">Predicted Opponent Leads</span>
             {leads.map((l,i)=>(
               <div key={i} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
                 <img src={getPokemonImage(l.p1)} className="poke-img-xs" alt={l.p1} onError={e=>{e.target.style.display='none';}}/>
-                <span className="mono" style={{fontSize:13,color:'var(--text)',fontWeight:600}}>{l.p1}</span>
+                <span className="mono" style={{fontSize:13,color:'var(--text)',fontWeight:700}}>{l.p1}</span>
                 <span className="mono" style={{fontSize:13,color:'var(--t3)'}}>+</span>
                 <img src={getPokemonImage(l.p2)} className="poke-img-xs" alt={l.p2} onError={e=>{e.target.style.display='none';}}/>
-                <span className="mono" style={{fontSize:13,color:'var(--text)',fontWeight:600}}>{l.p2}</span>
+                <span className="mono" style={{fontSize:13,color:'var(--text)',fontWeight:700}}>{l.p2}</span>
                 <span className="mono" style={{fontSize:12,color:'var(--amber)',marginLeft:'auto',fontWeight:700}}>{l.pct}%</span>
               </div>
             ))}
@@ -824,8 +991,12 @@ function DraftCoachTab({team}){
         )}
 
         {error&&<p className="errp">{error}</p>}
-        <button className="abtn" onClick={analyze} disabled={busy} style={{marginBottom:8}}>{busy?'Analyzing...':'Analyze Matchup →'}</button>
-        <p className="mono" style={{fontSize:11,color:'var(--t3)',textAlign:'center',marginBottom:'1.25rem'}}>Powered by Gemini (Free) · ChampionsMeta + PokeSynergy Data</p>
+        <button className="abtn" onClick={analyze} disabled={busy||!activeRoster.length} style={{marginBottom:8}}>
+          {busy?'Analyzing...':'Analyze Matchup →'}
+        </button>
+        <p className="mono" style={{fontSize:11,color:'var(--t3)',textAlign:'center',marginBottom:'1.25rem'}}>
+          {format==='doubles'?'Doubles':'Singles'} · {activeTeam?.name||'No team'} · Gemini (Free)
+        </p>
 
         <span className="sec-label">Session Notes</span>
         <textarea className="ta" placeholder="Log patterns, leads, misplays..."/>
@@ -835,17 +1006,19 @@ function DraftCoachTab({team}){
         {!result&&!busy&&<>
           <div className="bench" style={{paddingBottom:20}}>
             <div style={{fontSize:48,marginBottom:16}}>⚔</div>
-            <p className="mono" style={{fontSize:13,lineHeight:2,color:'var(--t3)'}}>Enter opponent team<br/>for AI game plan + set predictions</p>
+            <p className="mono" style={{fontSize:13,lineHeight:2,color:'var(--t3)'}}>
+              {format==='doubles'?'Enter opponent team\nfor AI game plan + set predictions':'Enter opponent team\nfor singles matchup analysis'}
+            </p>
           </div>
-          {filled.length>0&&<><span className="sec-label">Set Predictions</span>{filled.map(p=><MetaCard key={p} name={p}/>)}</>}
+          {filled.length>0&&<><span className="sec-label">Set Predictions (Meta Data)</span>{filled.map(p=><MetaCard key={p} name={p}/>)}</>}
         </>}
         {busy&&<div className="bench"><div style={{fontSize:44,marginBottom:14}}>⏳</div><p className="mono" style={{fontSize:13,color:'var(--t2)'}}>Asking Gemini...</p></div>}
         {result&&<>
           {Object.entries(result).map(([key,val])=>(
             <div key={key} className="rsec">
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                <span style={{fontSize:18}}>{SEC_ICONS[key]||'•'}</span>
-                <span className="mono" style={{fontSize:11,letterSpacing:'.1em',color:SEC_CLRS[key]||'#AFA9EC',textTransform:'uppercase',fontWeight:700}}>{key}</span>
+                <span style={{fontSize:18}}>{secIcons[key]||'•'}</span>
+                <span className="mono" style={{fontSize:11,letterSpacing:'.1em',color:secClrs[key]||'#AFA9EC',textTransform:'uppercase',fontWeight:700}}>{key}</span>
               </div>
               <p className="mono" style={{fontSize:13,color:'var(--t2)',margin:0,lineHeight:1.8,whiteSpace:'pre-wrap'}}>{val}</p>
             </div>
@@ -857,7 +1030,6 @@ function DraftCoachTab({team}){
     </div>
   );
 }
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home(){
   const [mainTab,setMainTab]=useState('coach');
@@ -872,13 +1044,11 @@ export default function Home(){
 
   const saveMatches=(data)=>{setAllMatches(data);try{localStorage.setItem('v8_matches',JSON.stringify(data));}catch(e){}};
 
-  const mainTeam=teams.find(t=>t.archetype==='perish')?.roster||TEAM_DEFAULT;
-
   return(
     <>
       <Head>
         <title>Champions Draft Coach</title>
-        <meta name="description" content="Perish Song trap team analyzer — Pokemon Champions Reg M-A"/>
+        <meta name="description" content="Pokemon Champions doubles + singles team analyzer — Reg M-A"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔</text></svg>"/>
       </Head>
@@ -888,7 +1058,7 @@ export default function Home(){
           <span style={{fontSize:32}}>⚔</span>
           <div>
             <h1>CHAMPIONS DRAFT COACH</h1>
-            <p>Perish Song Trap · Regulation M-A · Doubles · Gemini (Free) · PokeSynergy + ChampionsMeta + Pikalytics</p>
+            <p>Reg M-A · Doubles + Singles · Gemini (Free) · PokeSynergy + ChampionsMeta + Pikalytics</p>
           </div>
         </div>
         <div className="main-tabs">
@@ -898,7 +1068,7 @@ export default function Home(){
             </button>
           ))}
         </div>
-        {mainTab==='coach'     &&<DraftCoachTab team={mainTeam}/>}
+        {mainTab==='coach'     &&<DraftCoachTab teams={teams}/>}
         {mainTab==='speed'     &&<SpeedTab/>}
         {mainTab==='archetypes'&&<ArchetypesSection teams={teams} setTeams={setTeams} allMatches={allMatches} saveMatches={saveMatches}/>}
       </div>
