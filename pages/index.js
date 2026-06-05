@@ -229,7 +229,7 @@ function SpeedTab(){
                 <>
                   {bigGap&&<tr key={`gap-${i}`}><td colSpan={6} style={{padding:'4px 0',borderBottom:'1px dashed var(--b2)'}}></td></tr>}
                   <tr key={p.name} className={`${p.isMyMon?'my-mon':''}${p.isGhost&&!p.isMyMon?' ghost-mon':''}${p.isMega&&!p.isMyMon?' mega-row':''}`}>
-                    <td><img src={getPokemonImage(p.name)} className="poke-img-xs" alt={p.name} onError={e=>{e.target.style.display='none';}} style={{display:'block'}}/></td>
+                    <td><img src={getPokemonImage(p.name)} className="poke-img-xs" alt={p.name} style={{display:'block'}} onError={e=>{const base=p.name.replace(/^Mega /i,'').replace(/ \(.*\)/,''); e.target.src=getPokemonImage(base); e.target.onerror=()=>{e.target.style.display='none';};}} /></td>
                     <td>
                       <span style={{fontWeight:600,color:p.isMyMon?'var(--purple)':p.isGhost?'#FF8888':'var(--text)',fontSize:14}}>
                         {p.name}
